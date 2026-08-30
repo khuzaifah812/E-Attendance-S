@@ -24,4 +24,4 @@ RUN mkdir -p logs media staticfiles
 RUN python manage.py collectstatic --noinput || true
 
 
-CMD sh -c "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:10000"
+CMD python manage.py migrate admin zero --fake || true; python manage.py migrate --no-input || python manage.py migrate --fake-initial --no-input; python manage.py migrate --no-input; gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2D sh -c "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:10000"
