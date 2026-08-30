@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UICT-ESAS - Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f9ff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: #43a047;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-brand span { font-size: 14px; font-weight: 400; opacity: 0.8; }
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .navbar-right .user-info { text-align: right; }
+        .navbar-right .user-info .name { font-weight: 600; font-size: 14px; }
+        .navbar-right .user-info .role { font-size: 12px; opacity: 0.8; }
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
+        .btn-primary {
+            background: #43a047;
+            color: white;
+        }
+        .btn-primary:hover { background: #2e7d32; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        .academic-badge {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .academic-badge .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+        .academic-badge .badge-item strong { color: #43a047; }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 160, 71, 0.1);
+        }
+        .card .label {
+            font-size: 13px;
+            color: #888;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #43a047;
+            margin-top: 8px;
+        }
+        .card .sub {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .card.success .value { color: #2e7d32; }
+        .card.warning .value { color: #f9a825; }
+        .card.danger .value { color: #c62828; }
+        .card.info .value { color: #00838f; }
+        .card.purple .value { color: #6a1b9a; }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .quick-action-btn {
+            padding: 15px;
+            background: #e8f5e9;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #2e7d32;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+        .quick-action-btn:hover {
+            background: #c8e6c9;
+            border-color: #43a047;
+            transform: translateY(-2px);
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 13px;
+        }
+        .admin-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .admin-links a {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .admin-links a:hover { background: #e8f5e9; }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; text-align: center; }
+            .navbar-right { flex-direction: column; text-align: center; }
+            .container { padding: 15px; }
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+            .quick-actions { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .quick-actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            📚 UICT-ESAS
+            <span>Admin Dashboard</span>
+        </div>
+        <div class="navbar-right">
+            <div class="user-info">
+                <div class="name">{{ user.get_full_name }}</div>
+                <div class="role">{{ user.username }}</div>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-logout" style="background: rgba(255,255,255,0.2); color: white;">Dashboard</a>
+            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-logout">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="academic-badge">
+            <div class="badge-item">
+                📅 <strong>Academic Year:</strong> 
+                {% if academic_period %}
+                    {{ academic_period.academic_year.year }}
+                {% else %}
+                    Not Set
+                {% endif %}
+            </div>
+            <div class="badge-item">
+                📖 <strong>Semester:</strong>
+                {% if academic_period %}
+                    {{ academic_period.semester.get_name_display }}
+                {% else %}
+                    Not Set
+                {% endif %}
+            </div>
+            <div class="badge-item">
+                🔐 <strong>Role:</strong> Administrator
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card" onclick="location.href='{% url 'admin_manage_students' %}'">
+                <div class="label">Total Students</div>
+                <div class="value">{{ total_students }}</div>
+                <div class="sub">Active students</div>
+            </div>
+            <div class="card" onclick="location.href='{% url 'admin_manage_lecturers' %}'">
+                <div class="label">Total Lecturers</div>
+                <div class="value">{{ total_lecturers }}</div>
+                <div class="sub">Active lecturers</div>
+            </div>
+            <div class="card">
+                <div class="label">Coordinators</div>
+                <div class="value">{{ total_coordinators }}</div>
+                <div class="sub">Active coordinators</div>
+            </div>
+            <div class="card">
+                <div class="label">Programmes</div>
+                <div class="value">{{ total_programmes }}</div>
+                <div class="sub">Active programmes</div>
+            </div>
+            <div class="card success" onclick="location.href='{% url 'admin_manage_course_units' %}'">
+                <div class="label">Course Units</div>
+                <div class="value">{{ total_course_units }}</div>
+                <div class="sub">Active courses</div>
+            </div>
+            <div class="card warning">
+                <div class="label">Today's Lectures</div>
+                <div class="value">{{ today_lectures }}</div>
+                <div class="sub">Scheduled today</div>
+            </div>
+            <div class="card info">
+                <div class="label">Active Lectures</div>
+                <div class="value">{{ active_lectures }}</div>
+                <div class="sub">Currently in progress</div>
+            </div>
+            <div class="card purple">
+                <div class="label">Total Attendances</div>
+                <div class="value">{{ total_attendances }}</div>
+                <div class="sub">This period</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>⚡ Quick Actions</h3>
+            <div class="quick-actions">
+                <a href="{% url 'admin_manage_students' %}" class="quick-action-btn">
+                    👨‍🎓 Manage Students
+                </a>
+                <a href="{% url 'admin_manage_lecturers' %}" class="quick-action-btn">
+                    👨‍🏫 Manage Lecturers
+                </a>
+                <a href="{% url 'admin_manage_course_units' %}" class="quick-action-btn">
+                    📚 Manage Course Units
+                </a>
+                <a href="/admin/" class="quick-action-btn" target="_blank">
+                    🛠️ Django Admin
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🔗 Admin Links</h3>
+            <div class="admin-links">
+                <a href="{% url 'admin_manage_students' %}">👨‍🎓 Students</a>
+                <a href="{% url 'admin_manage_lecturers' %}">👨‍🏫 Lecturers</a>
+                <a href="{% url 'admin_manage_course_units' %}">📚 Course Units</a>
+                <a href="/admin/academics/academicyear/">📅 Academic Years</a>
+                <a href="/admin/academics/semester/">📖 Semesters</a>
+                <a href="/admin/attendance/attendance/">📊 Attendance</a>
+                <a href="/admin/audit_logs/auditlog/">📋 Audit Logs</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2025 UICT - UICT E-Attendance System (UICT-ESAS)
+        </div>
+    </div>
+</body>
+</html>

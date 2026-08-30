@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: uict-esas-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: uict_esas
+      MYSQL_USER: uict_user
+      MYSQL_PASSWORD: uict_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  web:
+    build: .
+    container_name: uict-esas-web
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py seed_demo_data &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - DB_NAME=uict_esas
+      - DB_USER=uict_user
+      - DB_PASSWORD=uict_password
+      - DB_HOST=db
+      - DB_PORT=3306
+      - SECRET_KEY=django-insecure-dev-secret-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  static_volume:
+  media_volume:

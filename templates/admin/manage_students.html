@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UICT-ESAS - Manage Students</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f9ff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: #43a047;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-brand span { font-size: 14px; font-weight: 400; opacity: 0.8; }
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .navbar-right .user-info { text-align: right; }
+        .navbar-right .user-info .name { font-weight: 600; font-size: 14px; }
+        .navbar-right .user-info .role { font-size: 12px; opacity: 0.8; }
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
+        .btn-primary {
+            background: #43a047;
+            color: white;
+        }
+        .btn-primary:hover { background: #2e7d32; }
+        .btn-success {
+            background: #2e7d32;
+            color: white;
+        }
+        .btn-success:hover { background: #1b5e20; }
+        .btn-danger {
+            background: #c62828;
+            color: white;
+        }
+        .btn-danger:hover { background: #b71c1c; }
+        .btn-warning {
+            background: #f9a825;
+            color: white;
+        }
+        .btn-warning:hover { background: #f57f17; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+        .academic-badge {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .academic-badge .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+        .academic-badge .badge-item strong { color: #43a047; }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .page-header h1 {
+            color: #2e7d32;
+            font-size: 24px;
+        }
+        .page-header .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+        .card h2 {
+            color: #2e7d32;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #43a047;
+            outline: none;
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+            resize: vertical;
+        }
+        .form-group textarea:focus {
+            border-color: #43a047;
+            outline: none;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .template-text {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .table-responsive { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #a5d6a7;
+        }
+        table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        table tr:hover { background: #f5f9ff; }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .badge-info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        .alert-danger {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        .alert-info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f5f9ff;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #43a047;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: #43a047;
+            transition: width 0.5s;
+        }
+        .tab-bar {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab-bar .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-bar .tab.active {
+            color: #43a047;
+            border-bottom-color: #43a047;
+        }
+        .tab-bar .tab:hover { color: #43a047; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        .search-box input:focus {
+            border-color: #43a047;
+            outline: none;
+        }
+        .search-box select {
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 13px;
+            margin-top: 30px;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+        .toast-success { background: #2e7d32; }
+        .toast-error { background: #c62828; }
+        .toast-info { background: #43a047; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .navbar { flex-direction: column; text-align: center; }
+            .navbar-right { flex-direction: column; text-align: center; }
+            .page-header { flex-direction: column; text-align: center; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .container { padding: 15px; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column; }
+            .form-actions .btn { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            📚 UICT-ESAS
+            <span>Admin Panel</span>
+        </div>
+        <div class="navbar-right">
+            <div class="user-info">
+                <div class="name">{{ user.get_full_name }}</div>
+                <div class="role">{{ user.username }}</div>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-logout" style="background: rgba(255,255,255,0.2); color: white;">Dashboard</a>
+            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-logout">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="academic-badge">
+            <div class="badge-item">
+                📅 <strong>Academic Year:</strong> 
+                {% if academic_period %}
+                    {{ academic_period.academic_year.year }}
+                {% else %}
+                    Not Set
+                {% endif %}
+            </div>
+            <div class="badge-item">
+                📖 <strong>Semester:</strong>
+                {% if academic_period %}
+                    {{ academic_period.semester.get_name_display }}
+                {% else %}
+                    Not Set
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="page-header">
+            <div>
+                <h1>👨‍🎓 Manage Students</h1>
+                <div class="subtitle">Add, view, and manage student records</div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="document.getElementById('addForm').scrollIntoView({behavior:'smooth'})">
+                    ➕ Add Students
+                </button>
+                <button class="btn btn-success" onclick="loadStudents()">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="number" id="totalStudents">0</div>
+                <div class="label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="activeStudents">0</div>
+                <div class="label">Active Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="programmesCount">0</div>
+                <div class="label">Programmes</div>
+            </div>
+        </div>
+
+        <div class="tab-bar">
+            <div class="tab active" data-tab="list" onclick="switchTab('list')">📋 Student List</div>
+            <div class="tab" data-tab="add" onclick="switchTab('add')">➕ Bulk Add</div>
+            <div class="tab" data-tab="template" onclick="switchTab('template')">📄 Template</div>
+        </div>
+
+        <div class="tab-content active" id="tab-list">
+            <div class="card">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by name, registration number, or programme..." onkeyup="filterStudents()">
+                    <select id="programmeFilter" onchange="filterStudents()" style="padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                        <option value="">All Programmes</option>
+                    </select>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Registration Number</th>
+                                <th>Full Name</th>
+                                <th>Programme</th>
+                                <th>Year</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                                    <div class="empty-state">
+                                        <div class="icon">📚</div>
+                                        <p>Loading students...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-add">
+            <div class="card" id="addForm">
+                <h2>📝 Bulk Add Students</h2>
+                <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
+                    Enter student details in the format below. One student per line.
+                </p>
+
+                <div class="alert alert-info">
+                    <strong>Format:</strong> Full Name | Registration Number | Programme Code | Year of Study<br>
+                    <strong>Example:</strong> AINE MBABAZI KHUZAIFAH | UICT/2025/DSWE/DAY/2246 | DSWE | 1
+                </div>
+
+                <div class="form-group">
+                    <label for="studentData">Student Data</label>
+                    <textarea id="studentData" placeholder="Paste student data here...&#10;Example:&#10;AINE MBABAZI KHUZAIFAH | UICT/2025/DSWE/DAY/2246 | DSWE | 1&#10;BARAKA RODGERS | UICT/2025/DSWE/DAY/1595 | DSWE | 1"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-success" onclick="addStudents()">➕ Add Students</button>
+                    <button class="btn btn-warning" onclick="document.getElementById('studentData').value = ''">🗑️ Clear</button>
+                    <button class="btn btn-primary" onclick="loadSampleData()">📄 Load Sample Data</button>
+                </div>
+
+                <div id="addProgress" style="display: none; margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 14px; color: #666;">
+                        <span id="progressText">Processing...</span>
+                        <span id="progressCount">0 / 0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="fill" id="progressFill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div id="addResults" style="display: none; margin-top: 15px;"></div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-template">
+            <div class="card">
+                <h2>📄 CSV/Excel Template</h2>
+                <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
+                    Use the following template format for bulk import. Save as CSV or paste directly.
+                </p>
+
+                <div class="template-text">
+Full Name,Registration Number,Programme Code,Year of Study
+AINE MBABAZI KHUZAIFAH,UICT/2025/DSWE/DAY/2246,DSWE,1
+BARAKA RODGERS,UICT/2025/DSWE/DAY/1595,DSWE,1
+ATURINDA SYLONE,UICT/2025/DSWE/DAY/2610,DSWE,1
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="downloadTemplate()">📥 Download Template</button>
+                    <button class="btn btn-success" onclick="switchTab('add')">📝 Go to Bulk Add</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2025 UICT - UICT E-Attendance System (UICT-ESAS)
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        let allStudents = [];
+        let programmes = [];
+
+        function getCsrfToken() {
+            const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+            return cookie ? cookie.split('=')[1] : '';
+        }
+
+        async function loadProgrammes() {
+            try {
+                const response = await fetch('/api/admin/get-programmes/');
+                const data = await response.json();
+                if (data.programmes) {
+                    programmes = data.programmes;
+                    const filter = document.getElementById('programmeFilter');
+                    filter.innerHTML = '<option value="">All Programmes</option>';
+                    data.programmes.forEach(p => {
+                        filter.innerHTML += `<option value="${p.code}">${p.code} - ${p.name}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading programmes:', error);
+            }
+        }
+
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/admin/get-students/');
+                const data = await response.json();
+                if (data.students) {
+                    allStudents = data.students;
+                    renderStudents(allStudents);
+                    updateStats(allStudents);
+                }
+            } catch (error) {
+                console.error('Error loading students:', error);
+                showToast('Error loading students', 'error');
+            }
+        }
+
+        function renderStudents(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            if (!students || students.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                            <div class="empty-state">
+                                <div class="icon">📚</div>
+                                <p>No students found</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = students.map((s, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><strong>${s.registration_number}</strong></td>
+                    <td>${s.full_name}</td>
+                    <td><span class="badge badge-info">${s.programme}</span></td>
+                    <td>Year ${s.year_of_study}</td>
+                    <td>
+                        <span class="badge ${s.is_active ? 'badge-success' : 'badge-danger'}">
+                            ${s.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td style="font-size: 12px; color: #888;">${s.created_at}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats(students) {
+            const total = students.length;
+            const active = students.filter(s => s.is_active).length;
+            document.getElementById('totalStudents').textContent = total;
+            document.getElementById('activeStudents').textContent = active;
+            document.getElementById('programmesCount').textContent = programmes.length;
+        }
+
+        function filterStudents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const programmeFilter = document.getElementById('programmeFilter').value;
+
+            const filtered = allStudents.filter(s => {
+                const matchName = s.full_name.toLowerCase().includes(searchTerm);
+                const matchReg = s.registration_number.toLowerCase().includes(searchTerm);
+                const matchProgramme = !programmeFilter || s.programme === programmeFilter;
+                return (matchName || matchReg) && matchProgramme;
+            });
+
+            renderStudents(filtered);
+        }
+
+        async function addStudents() {
+            const textarea = document.getElementById('studentData');
+            const data = textarea.value.trim();
+
+            if (!data) {
+                showToast('Please enter student data', 'error');
+                return;
+            }
+
+            const lines = data.split('\n').filter(line => line.trim());
+            const students = [];
+
+            for (const line of lines) {
+                let parts;
+                if (line.includes('|')) {
+                    parts = line.split('|').map(p => p.trim());
+                } else if (line.includes('\t')) {
+                    parts = line.split('\t').map(p => p.trim());
+                } else {
+                    parts = line.split(',').map(p => p.trim());
+                }
+
+                if (parts.length >= 3) {
+                    students.push({
+                        full_name: parts[0],
+                        registration_number: parts[1],
+                        programme: parts[2],
+                        year_of_study: parseInt(parts[3]) || 1
+                    });
+                }
+            }
+
+            if (students.length === 0) {
+                showToast('No valid student data found', 'error');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to add ${students.length} students?`)) {
+                return;
+            }
+
+            const progressDiv = document.getElementById('addProgress');
+            progressDiv.style.display = 'block';
+            document.getElementById('progressText').textContent = 'Adding students...';
+            document.getElementById('progressCount').textContent = `0 / ${students.length}`;
+            document.getElementById('progressFill').style.width = '0%';
+
+            try {
+                const response = await fetch('/api/admin/add-students-bulk/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ students: students })
+                });
+
+                const result = await response.json();
+
+                document.getElementById('progressText').textContent = 'Complete!';
+                document.getElementById('progressCount').textContent = `${result.created.length} / ${result.total}`;
+                document.getElementById('progressFill').style.width = '100%';
+
+                const resultsDiv = document.getElementById('addResults');
+                resultsDiv.style.display = 'block';
+
+                let html = '';
+                if (result.created.length > 0) {
+                    html += `<div class="alert alert-success">✅ Added ${result.created.length} students successfully!</div>`;
+                    html += `<div style="max-height: 200px; overflow-y: auto; font-size: 13px;">`;
+                    result.created.forEach(s => {
+                        html += `<div style="padding: 5px 10px; border-bottom: 1px solid #eee;">
+                            ✅ ${s.full_name} (${s.registration_number}) - ${s.programme}
+                        </div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                if (result.errors.length > 0) {
+                    html += `<div class="alert alert-danger">❌ ${result.errors.length} errors occurred:</div>`;
+                    html += `<div style="max-height: 200px; overflow-y: auto; font-size: 13px;">`;
+                    result.errors.forEach(e => {
+                        html += `<div style="padding: 5px 10px; border-bottom: 1px solid #eee; color: #c62828;">
+                            ❌ ${e.error}
+                        </div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                resultsDiv.innerHTML = html;
+
+                if (result.created.length > 0) {
+                    showToast(`Added ${result.created.length} students successfully!`, 'success');
+                    loadStudents();
+                    if (result.errors.length === 0) {
+                        textarea.value = '';
+                    }
+                } else {
+                    showToast('Failed to add students', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error adding students: ' + error.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    document.getElementById('addProgress').style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function loadSampleData() {
+            const sample = `AINE MBABAZI KHUZAIFAH | UICT/2025/DSWE/DAY/2246 | DSWE | 1
+        BARAKA RODGERS | UICT/2025/DSWE/DAY/1595 | DSWE | 1
+        ATURINDA SYLONE | UICT/2025/DSWE/DAY/2610 | DSWE | 1
+        TURYAMUHAKI RODGERS | UICT/2025/DSWE/DAY/1638 | DSWE | 1
+        ALOKO PEACE | UICT/2025/DSWE/DAY/1639 | DSWE | 1
+        AGABA BENJAMIN | UICT/2025/DSWE/DAY/2510 | DSWE | 1
+        MUHINDO SIMON | UICT/2025/DSWE/DAY/1583 | DSWE | 1
+        NABAGESERA AIDAH RUTH | UICT/2025/DSWE/DAY/1568 | DSWE | 1`;
+            document.getElementById('studentData').value = sample;
+            showToast('Sample data loaded!', 'success');
+        }
+
+        function downloadTemplate() {
+            const content = `Full Name,Registration Number,Programme Code,Year of Study
+        AINE MBABAZI KHUZAIFAH,UICT/2025/DSWE/DAY/2246,DSWE,1
+        BARAKA RODGERS,UICT/2025/DSWE/DAY/1595,DSWE,1
+        ATURINDA SYLONE,UICT/2025/DSWE/DAY/2610,DSWE,1
+        TURYAMUHAKI RODGERS,UICT/2025/DSWE/DAY/1638,DSWE,1
+        ALOKO PEACE,UICT/2025/DSWE/DAY/1639,DSWE,1
+        AGABA BENJAMIN,UICT/2025/DSWE/DAY/2510,DSWE,1
+        MUHINDO SIMON,UICT/2025/DSWE/DAY/1583,DSWE,1
+        NABAGESERA AIDAH RUTH,UICT/2025/DSWE/DAY/1568,DSWE,1`;
+
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'student_template.csv';
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('Template downloaded!', 'success');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProgrammes();
+            loadStudents();
+        });
+    </script>
+</body>
+</html>
