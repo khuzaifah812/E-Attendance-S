@@ -1,9 +1,10 @@
 #!/bin/sh
-echo "Running migrations..."
+set -e
+
+echo ">>> RUNNING MIGRATIONS - Creating tables if not exist..."
 python manage.py migrate --noinput
 
-echo "Collecting static..."
-python manage.py collectstatic --noinput
+echo ">>> MIGRATIONS DONE"
+echo ">>> Starting Gunicorn..."
 
-echo "Starting server..."
-exec gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+exec "$@"
