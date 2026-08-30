@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN mkdir -p logs media staticfiles
 RUN python manage.py collectstatic --noinput || true
-CMD sh -c "python manage.py shell -c \"from django.db import connection; c=connection.cursor(); c.execute('SET FOREIGN_KEY_CHECKS=0'); c.execute('SHOW TABLES'); tbls=[r[0] for r in c.fetchall()]; print('Dropping', tbls); [c.execute(f'DROP TABLE IF EXISTS '+t) for t in tbls]; c.execute('SET FOREIGN_KEY_CHECKS=1')\" || true; python manage.py migrate --no-input; gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+CMD python manage.py migrate --no-input; DJANGO_SUPERUSER_USERNAME=khuzaifah DJANGO_SUPERUSER_EMAIL=khuzaifah@uict.ac.ug DJANGO_SUPERUSER_PASSWORD=kamcoder812 python manage.py createsuperuser --no-input || true; gunicorn config.wsgi:application --bind 0.0.0.0:8000
