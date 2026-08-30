@@ -78,10 +78,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'b8tny3os66selvntagb'),
-        'USER': os.getenv('DB_USER', 'uuzivweyhloqrg90'),
+        'NAME': os.getenv('DB_NAME', 'b8tny3os66selvntagyb'),
+        'USER': os.getenv('DB_USER', 'uuzivweyhloqrq90'),
         'PASSWORD': os.getenv('DB_PASSWORD', '3yZZD8rIGihHeVELbQQH'),
-        'HOST': os.getenv('DB_HOST', 'b8tny3os66selvntagb-mysql.services.clever-cloud.com'),
+        'HOST': os.getenv('DB_HOST', 'b8tny3os66selvntagyb-mysql.services.clever-cloud.com'),
         'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
