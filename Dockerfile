@@ -25,4 +25,7 @@ RUN python manage.py collectstatic --noinput || true
 
 EXPOSE 8000
 
-CMD python manage.py migrate --fake-initial || true && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+# Copy entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
