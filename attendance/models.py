@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from students.models import Student
+
 from lectures.models import Lecture
 from academics.models import AcademicPeriod
 
@@ -13,7 +13,7 @@ class Attendance(models.Model):
         ('late', 'Late'),
         ('excused', 'Excused'),
     )
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
+    student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='attendances')
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, related_name='attendances')
     academic_period = models.ForeignKey(AcademicPeriod, on_delete=models.PROTECT)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='present')

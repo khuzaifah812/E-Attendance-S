@@ -11,9 +11,9 @@ def health_check(request):
 
 urlpatterns = [
     # YOUR CUSTOM ADMIN PAGES - MUST BE FIRST
-    path('admin/manage-lecturers/', core_views.manage_lecturers, name='manage-lecturers'),
-    path('admin/manage-students/', core_views.manage_students, name='manage-students'),
-    path('admin/manage-course-units/', core_views.manage_course_units, name='manage-course-units'),
+    path('admin/manage-lecturers/', core_views.admin_manage_lecturers, name='admin_manage-lecturers'),
+    path('admin/manage-students/', core_views.admin_manage_students, name='admin_manage-students'),
+    path('admin/manage-course-units/', core_views.admin_manage_course_units, name='admin_manage-course-units'),
     path('admin/dashboard/', core_views.admin_dashboard, name='admin-dashboard'),
 
     # Django default

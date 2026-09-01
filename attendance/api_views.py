@@ -1,14 +1,13 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db import transaction
 from django.contrib.auth import get_user_model
 import secrets
 import math
-import json
 from .models import Attendance, AttendanceDevice
 from lectures.models import Lecture
 from students.models import Student
@@ -33,7 +32,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def take_attendance(self, request):
         """
-        Student takes attendance for an active lecture
+        Student takes attendance for an active lecture with room coordinate validation
         """
         try:
             # Get student profile
@@ -104,21 +103,21 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             
             if lecture.academic_period != current_period:
                 return Response(
-                    {'error': f'This lecture belongs to a different academic period. Current period: {current_period}'},
+                    {'error': 'This lecture belongs to a different academic period.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
             # Verify student is enrolled in this course
             if student.programme != lecture.programme:
                 return Response(
-                    {'error': f'You are not enrolled in this course. This lecture is for {lecture.programme.name} students.'},
+                    {'error': 'You are not enrolled in this course.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
             # Check verification code
             if not lecture.verification_code:
                 return Response(
-                    {'error': 'No verification code has been generated for this lecture. Please ask the lecturer to generate a code.'},
+                    {'error': 'No verification code has been generated. Please ask the lecturer to generate a code.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -141,8 +140,16 @@ class AttendanceViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Physical lecture location validation
+            # PHYSICAL LECTURE - Validate location against ROOM COORDINATES
+            distance_from_room = None
             if lecture.lecture_type == 'PHYSICAL':
+                # Check if room coordinates are set
+                if not lecture.room_latitude or not lecture.room_longitude:
+                    return Response(
+                        {'error': 'Room coordinates not set for this lecture. Please contact the lecturer.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
                 if not latitude or not longitude:
                     return Response(
                         {'error': 'LOCATION PERMISSION IS REQUIRED. Please allow location access to take attendance for physical lectures.'},
@@ -158,16 +165,30 @@ class AttendanceViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
                 
-                # Check if student is within campus
-                is_within_campus, distance = self._check_location(latitude, longitude)
-                if not is_within_campus:
-                    return Response(
-                        {'error': f'YOU ARE OUT OF THE CLASSROOM. You are approximately {distance:.0f} meters away from the campus. Please move within 100 meters of the campus to take attendance.'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            
-            # Online lecture - skip location validation
-            # No location check for online lectures
+                # Get room coordinates from lecture
+                room_lat = float(lecture.room_latitude)
+                room_lon = float(lecture.room_longitude)
+                room_radius = lecture.room_radius or 50  # Default 50 meters
+                
+                # Check if student is within the room's allowed radius
+                is_within_room, distance = self._check_location(latitude, longitude, room_lat, room_lon, room_radius)
+                distance_from_room = distance
+                
+                if not is_within_room:
+                    return Response({
+                        'error': 'YOU ARE OUT OF THE CLASSROOM.',
+                        'details': 'You are approximately ' + str(round(distance, 1)) + ' meters away from the classroom. Please move within ' + str(room_radius) + ' meters of the classroom.',
+                        'distance': round(distance, 1),
+                        'allowed_radius': room_radius,
+                        'room_latitude': room_lat,
+                        'room_longitude': room_lon,
+                        'your_latitude': latitude,
+                        'your_longitude': longitude
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # ONLINE LECTURE - Skip location validation
+                latitude = None
+                longitude = None
             
             # Check device restriction
             if device_identifier:
@@ -183,16 +204,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
                     )
             else:
                 # Generate device identifier if not provided
-                device_identifier = f"unknown_{secrets.token_hex(8)}"
-                # Try to get from request headers
-                user_agent = request.META.get('HTTP_USER_AGENT', '')
-                if user_agent:
-                    device_identifier = f"device_{hash(user_agent)}_{secrets.token_hex(4)}"
-                    localStorage_id = request.data.get('device_identifier', '')
-                    if localStorage_id:
-                        device_identifier = localStorage_id
-                else:
-                    device_identifier = f"device_{secrets.token_hex(10)}"
+                device_identifier = 'device_' + secrets.token_hex(10)
             
             # Create attendance
             with transaction.atomic():
@@ -202,12 +214,13 @@ class AttendanceViewSet(viewsets.ModelViewSet):
                     academic_period=current_period,
                     status='present',
                     ip_address=request.META.get('REMOTE_ADDR', ''),
-                    latitude=latitude if lecture.lecture_type == 'PHYSICAL' else None,
-                    longitude=longitude if lecture.lecture_type == 'PHYSICAL' else None,
+                    latitude=latitude,
+                    longitude=longitude,
+                    distance_from_location=distance_from_room,
                     device_identifier=device_identifier,
                     verification_code_used=verification_code,
                     verification_result='success',
-                    notes=f"Lecture type: {lecture.lecture_type}"
+                    notes='Lecture type: ' + lecture.lecture_type + ' | Room: ' + (lecture.location or 'Not specified')
                 )
                 
                 # Create device record
@@ -218,42 +231,57 @@ class AttendanceViewSet(viewsets.ModelViewSet):
                     ip_address=request.META.get('REMOTE_ADDR', '')
                 )
             
-            # Get updated attendance count
+            # Get updated attendance statistics based on semester lectures
+            stats = student.get_attendance_stats(current_period)
+            
+            # Get updated attendance count for this lecture
             attendance_count = lecture.attendances.count()
             
-            return Response({
+            response_data = {
                 'success': True,
                 'message': '✅ Attendance recorded successfully!',
                 'attendance_id': attendance.id,
                 'status': 'present',
                 'lecture_type': lecture.lecture_type,
-                'total_attendance': attendance_count
-            }, status=status.HTTP_201_CREATED)
+                'total_attendance': attendance_count,
+                'student_stats': {
+                    'total_lectures': stats['total_lectures'],
+                    'attended': stats['attended'],
+                    'present': stats['present'],
+                    'late': stats['late'],
+                    'absent': stats['absent'],
+                    'percentage': stats['percentage']
+                }
+            }
+            
+            # Add location verification details for physical lectures
+            if lecture.lecture_type == 'PHYSICAL':
+                response_data['location_verified'] = True
+                response_data['distance_from_room'] = round(distance_from_room, 1) if distance_from_room else None
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
             
         except Exception as e:
             import traceback
             traceback.print_exc()
             return Response(
-                {'error': f'An error occurred: {str(e)}'},
+                {'error': 'An error occurred: ' + str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-    def _check_location(self, latitude, longitude):
+    def _check_location(self, student_lat, student_lon, room_lat, room_lon, radius=50):
         """
-        Check if student is within campus (simplified)
-        In production, use actual campus coordinates from settings
+        Check if student is within the room's allowed radius using Haversine formula
+        Returns: (is_within, distance_in_meters)
         """
-        # Campus coordinates - UPDATE THESE WITH YOUR ACTUAL CAMPUS COORDINATES
-        campus_lat = 0.0  # Replace with your campus latitude
-        campus_lon = 0.0  # Replace with your campus longitude
-        radius = 100  # meters (allowed radius)
-        
         try:
-            lat1 = math.radians(float(latitude))
-            lon1 = math.radians(float(longitude))
-            lat2 = math.radians(campus_lat)
-            lon2 = math.radians(campus_lon)
+            # Convert to radians
+            lat1 = math.radians(float(student_lat))
+            lon1 = math.radians(float(student_lon))
+            lat2 = math.radians(float(room_lat))
+            lon2 = math.radians(float(room_lon))
             
+            # Haversine formula
             dlon = lon2 - lon1
             dlat = lat2 - lat1
             
@@ -263,7 +291,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             distance = 6371000 * c  # Earth radius in meters
             
             return distance <= radius, distance
-        except:
+        except Exception as e:
             return False, 999999
     
     @action(detail=False, methods=['post'])
@@ -313,7 +341,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response(
-                {'error': f'Failed to start lecture: {str(e)}'},
+                {'error': 'Failed to start lecture: ' + str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -358,7 +386,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response(
-                {'error': f'Failed to end lecture: {str(e)}'},
+                {'error': 'Failed to end lecture: ' + str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -396,7 +424,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response(
-                {'error': f'Failed to generate code: {str(e)}'},
+                {'error': 'Failed to generate code: ' + str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -404,7 +432,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
         """
         Generate a secure verification code
         """
-        code = f"UICT-{secrets.token_hex(3).upper()}"
+        code = 'UICT-' + secrets.token_hex(3).upper()
         lecture.verification_code = code
         lecture.code_expires_at = timezone.now() + timezone.timedelta(minutes=30)
         lecture.save()

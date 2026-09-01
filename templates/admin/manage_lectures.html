@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UICT-ESAS - Manage Lectures</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f9ff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: #43a047;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-brand span { font-size: 14px; font-weight: 400; opacity: 0.8; }
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .navbar-right .user-info { text-align: right; }
+        .navbar-right .user-info .name { font-weight: 600; font-size: 14px; }
+        .navbar-right .user-info .role { font-size: 12px; opacity: 0.8; }
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
+        .btn-primary {
+            background: #43a047;
+            color: white;
+        }
+        .btn-primary:hover { background: #2e7d32; }
+        .btn-success {
+            background: #2e7d32;
+            color: white;
+        }
+        .btn-success:hover { background: #1b5e20; }
+        .btn-danger {
+            background: #c62828;
+            color: white;
+        }
+        .btn-danger:hover { background: #b71c1c; }
+        .btn-warning {
+            background: #f9a825;
+            color: white;
+        }
+        .btn-warning:hover { background: #f57f17; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+        .academic-badge {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .academic-badge .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+        .academic-badge .badge-item strong { color: #43a047; }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .page-header h1 {
+            color: #2e7d32;
+            font-size: 24px;
+        }
+        .page-header .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+        .card h2 {
+            color: #2e7d32;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #43a047;
+            outline: none;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .table-responsive { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #a5d6a7;
+        }
+        table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        table tr:hover { background: #f5f9ff; }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .badge-info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .badge-warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .badge-physical {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        .badge-online {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .badge-coords {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .badge-no-coords {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        .alert-danger {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        .alert-info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+        .alert-warning {
+            background: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffcc80;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f5f9ff;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #43a047;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal h2 {
+            color: #2e7d32;
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        .modal .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .modal .form-actions {
+            margin-top: 20px;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 13px;
+            margin-top: 30px;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        .search-box input:focus {
+            border-color: #43a047;
+            outline: none;
+        }
+        .search-box select {
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .toast-success { background: #2e7d32; }
+        .toast-error { background: #c62828; }
+        .toast-info { background: #43a047; }
+        .toast-warning { background: #f9a825; color: #333; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .location-info {
+            background: #e3f2fd;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #1565c0;
+        }
+        .location-info .label {
+            font-weight: 600;
+        }
+        .actions-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .actions-cell .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-sm-edit {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        .btn-sm-edit:hover { background: #bbdefb; }
+        .btn-sm-delete {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .btn-sm-delete:hover { background: #ffcdd2; }
+        .btn-sm-start {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .btn-sm-start:hover { background: #c8e6c9; }
+        .btn-sm-view {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .btn-sm-view:hover { background: #ffe0b2; }
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .form-row-3 { grid-template-columns: 1fr; }
+            .navbar { flex-direction: column; text-align: center; }
+            .navbar-right { flex-direction: column; text-align: center; }
+            .page-header { flex-direction: column; text-align: center; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .container { padding: 15px; }
+            .modal { padding: 25px; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .actions-cell { flex-direction: column; }
+            .actions-cell .btn-sm { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            📚 UICT-ESAS
+            <span>{% if user.role == 'admin' %}Admin{% else %}Lecturer{% endif %} Panel</span>
+        </div>
+        <div class="navbar-right">
+            <div class="user-info">
+                <div class="name">{{ user.get_full_name }}</div>
+                <div class="role">{{ user.username }}</div>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-logout" style="background: rgba(255,255,255,0.2); color: white;">Dashboard</a>
+            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-logout">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="academic-badge">
+            <div class="badge-item">
+                📅 <strong>Academic Year:</strong> 
+                {% if academic_period %}
+                    {{ academic_period.academic_year.year }}
+                {% else %}
+                    Not Set
+                {% endif %}
+            </div>
+            <div class="badge-item">
+                📖 <strong>Semester:</strong>
+                {% if academic_period %}
+                    {{ academic_period.semester.get_name_display }}
+                {% else %}
+                    Not Set
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="page-header">
+            <div>
+                <h1>📚 Manage Lectures</h1>
+                <div class="subtitle">Schedule and manage lectures with room coordinates for location verification</div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="openAddLectureModal()">➕ Add Lecture</button>
+                <button class="btn btn-success" onclick="loadLectures()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="number" id="totalLectures">0</div>
+                <div class="label">Total Lectures</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="activeLectures">0</div>
+                <div class="label">Active Lectures</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="physicalLectures">0</div>
+                <div class="label">Physical Lectures</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="onlineLectures">0</div>
+                <div class="label">Online Lectures</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="withCoords">0</div>
+                <div class="label">With Room Coordinates</div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="card">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by title, course, or lecturer..." onkeyup="filterLectures()">
+                <select id="typeFilter" onchange="filterLectures()">
+                    <option value="">All Types</option>
+                    <option value="PHYSICAL">Physical</option>
+                    <option value="ONLINE">Online</option>
+                </select>
+                <select id="statusFilter" onchange="filterLectures()">
+                    <option value="">All Statuses</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Title</th>
+                            <th>Course</th>
+                            <th>Lecturer</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Room Location</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lecturesTableBody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
+                                <div style="font-size: 48px; margin-bottom: 10px;">📚</div>
+                                <p>Loading lectures...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2025 UICT - UICT E-Attendance System (UICT-ESAS)
+        </div>
+    </div>
+
+    <!-- Add/Edit Lecture Modal -->
+    <div class="modal-overlay" id="lectureModal">
+        <div class="modal">
+            <h2 id="modalTitle">📝 Add New Lecture</h2>
+            <div class="subtitle" id="modalSubtitle">Schedule a lecture with room coordinates for location verification</div>
+
+            <div id="modalError" class="alert alert-danger" style="display: none;"></div>
+
+            <form id="lectureForm">
+                {% csrf_token %}
+                <input type="hidden" id="lectureId" value="">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lectureTitle">Lecture Title *</label>
+                        <input type="text" id="lectureTitle" placeholder="e.g., Introduction to UI/UX" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lectureCourse">Course Unit *</label>
+                        <select id="lectureCourse" required>
+                            <option value="">Select Course Unit</option>
+                            {% for course in course_units %}
+                                <option value="{{ course.id }}">{{ course.code }} - {{ course.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lectureProgramme">Programme</label>
+                        <select id="lectureProgramme">
+                            <option value="">Auto from Course</option>
+                            {% for programme in programmes %}
+                                <option value="{{ programme.id }}">{{ programme.code }} - {{ programme.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lectureLecturer">Lecturer</label>
+                        <select id="lectureLecturer">
+                            <option value="">Auto from Course</option>
+                            {% for lecturer in lecturers %}
+                                <option value="{{ lecturer.id }}">{{ lecturer.get_full_name }} ({{ lecturer.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lectureType">Lecture Type *</label>
+                        <select id="lectureType" required>
+                            <option value="PHYSICAL">Physical (Location Required)</option>
+                            <option value="ONLINE">Online (No Location Check)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lectureLocation">Room/Location Name</label>
+                        <input type="text" id="lectureLocation" placeholder="e.g., Room 101, Online">
+                    </div>
+                </div>
+
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label for="lectureDate">Date *</label>
+                        <input type="date" id="lectureDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lectureStartTime">Start Time *</label>
+                        <input type="time" id="lectureStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lectureEndTime">End Time *</label>
+                        <input type="time" id="lectureEndTime" required>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" style="margin: 15px 0;">
+                    <strong>📍 Room Coordinates for Physical Lectures</strong><br>
+                    These coordinates will be used to verify student location when taking attendance.
+                    Students must be within the allowed radius to mark attendance.
+                </div>
+
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label for="lectureLatitude">Room Latitude</label>
+                        <input type="number" id="lectureLatitude" step="0.0000001" placeholder="e.g., 0.123456">
+                        <div class="help-text">e.g., 0.123456</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lectureLongitude">Room Longitude</label>
+                        <input type="number" id="lectureLongitude" step="0.0000001" placeholder="e.g., 32.123456">
+                        <div class="help-text">e.g., 32.123456</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lectureRadius">Allowed Radius (meters)</label>
+                        <input type="number" id="lectureRadius" value="50" placeholder="50">
+                        <div class="help-text">Default: 50 meters</div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-success" onclick="saveLecture()">💾 Save Lecture</button>
+                    <button type="button" class="btn btn-danger" onclick="closeLectureModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        let allLectures = [];
+        let editingLectureId = null;
+
+        // Get CSRF token
+        function getCsrfToken() {
+            const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+            return cookie ? cookie.split('=')[1] : '';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+        }
+
+        // Load lectures
+        async function loadLectures() {
+            try {
+                const response = await fetch('/api/admin/get-lectures/');
+                const data = await response.json();
+                if (data.lectures) {
+                    allLectures = data.lectures;
+                    renderLectures(allLectures);
+                    updateStats(allLectures);
+                }
+            } catch (error) {
+                console.error('Error loading lectures:', error);
+                showToast('Error loading lectures', 'error');
+            }
+        }
+
+        // Render lectures
+        function renderLectures(lectures) {
+            const tbody = document.getElementById('lecturesTableBody');
+            if (!lectures || lectures.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">📚</div>
+                            <p>No lectures found</p>
+                            <button class="btn btn-primary" onclick="openAddLectureModal()" style="margin-top: 10px;">Add First Lecture</button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = lectures.map((l, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><strong>${l.title}</strong></td>
+                    <td><span class="badge badge-info">${l.course_unit}</span></td>
+                    <td>${l.lecturer_name}</td>
+                    <td>${l.scheduled_date}</td>
+                    <td>
+                        <span class="badge ${l.lecture_type === 'PHYSICAL' ? 'badge-physical' : 'badge-online'}">
+                            ${l.lecture_type}
+                        </span>
+                    </td>
+                    <td>
+                        ${l.has_coordinates ? 
+                            `<span class="badge badge-coords">📍 ${l.location || 'Room'}</span>` :
+                            `<span class="badge badge-no-coords">⚠️ No coordinates</span>`
+                        }
+                    </td>
+                    <td>
+                        <span class="badge ${l.status === 'active' ? 'badge-success' : l.status === 'cancelled' ? 'badge-danger' : 'badge-warning'}">
+                            ${l.status}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="btn-sm btn-sm-edit" onclick="editLecture(${l.id})">✏️ Edit</button>
+                            ${l.status === 'scheduled' ? 
+                                `<button class="btn-sm btn-sm-start" onclick="startLecture(${l.id})">▶️ Start</button>` : ''
+                            }
+                            <button class="btn-sm btn-sm-delete" onclick="deleteLecture(${l.id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Update stats
+        function updateStats(lectures) {
+            const total = lectures.length;
+            const active = lectures.filter(l => l.status === 'active').length;
+            const physical = lectures.filter(l => l.lecture_type === 'PHYSICAL').length;
+            const online = lectures.filter(l => l.lecture_type === 'ONLINE').length;
+            const withCoords = lectures.filter(l => l.has_coordinates).length;
+
+            document.getElementById('totalLectures').textContent = total;
+            document.getElementById('activeLectures').textContent = active;
+            document.getElementById('physicalLectures').textContent = physical;
+            document.getElementById('onlineLectures').textContent = online;
+            document.getElementById('withCoords').textContent = withCoords;
+        }
+
+        // Filter lectures
+        function filterLectures() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const filtered = allLectures.filter(l => {
+                const matchSearch = l.title.toLowerCase().includes(searchTerm) ||
+                    l.course_unit.toLowerCase().includes(searchTerm) ||
+                    l.lecturer_name.toLowerCase().includes(searchTerm);
+                const matchType = !typeFilter || l.lecture_type === typeFilter;
+                const matchStatus = !statusFilter || l.status === statusFilter;
+                return matchSearch && matchType && matchStatus;
+            });
+
+            renderLectures(filtered);
+        }
+
+        // Open add lecture modal
+        function openAddLectureModal() {
+            editingLectureId = null;
+            document.getElementById('modalTitle').textContent = '📝 Add New Lecture';
+            document.getElementById('modalSubtitle').textContent = 'Schedule a lecture with room coordinates for location verification';
+            document.getElementById('lectureForm').reset();
+            document.getElementById('lectureId').value = '';
+            document.getElementById('modalError').style.display = 'none';
+            document.getElementById('lectureRadius').value = 50;
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('lectureDate').value = today;
+            
+            document.getElementById('lectureModal').classList.add('active');
+        }
+
+        // Edit lecture
+        async function editLecture(lectureId) {
+            try {
+                const response = await fetch(`/api/admin/get-lecture/${lectureId}/`);
+                const data = await response.json();
+                if (data.lecture) {
+                    const l = data.lecture;
+                    editingLectureId = lectureId;
+                    document.getElementById('modalTitle').textContent = '✏️ Edit Lecture';
+                    document.getElementById('modalSubtitle').textContent = 'Update lecture details and room coordinates';
+                    document.getElementById('lectureId').value = lectureId;
+                    document.getElementById('lectureTitle').value = l.title;
+                    document.getElementById('lectureCourse').value = l.course_unit;
+                    document.getElementById('lectureProgramme').value = l.programme;
+                    document.getElementById('lectureLecturer').value = l.lecturer;
+                    document.getElementById('lectureType').value = l.lecture_type;
+                    document.getElementById('lectureLocation').value = l.location || '';
+                    document.getElementById('lectureDate').value = l.scheduled_date;
+                    document.getElementById('lectureStartTime').value = l.start_time;
+                    document.getElementById('lectureEndTime').value = l.end_time;
+                    document.getElementById('lectureLatitude').value = l.room_latitude || '';
+                    document.getElementById('lectureLongitude').value = l.room_longitude || '';
+                    document.getElementById('lectureRadius').value = l.room_radius || 50;
+                    document.getElementById('modalError').style.display = 'none';
+                    document.getElementById('lectureModal').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error loading lecture:', error);
+                showToast('Error loading lecture details', 'error');
+            }
+        }
+
+        // Close lecture modal
+        function closeLectureModal() {
+            document.getElementById('lectureModal').classList.remove('active');
+            editingLectureId = null;
+        }
+
+        // Save lecture
+        async function saveLecture() {
+            const title = document.getElementById('lectureTitle').value.trim();
+            const course_unit = document.getElementById('lectureCourse').value;
+            const programme = document.getElementById('lectureProgramme').value;
+            const lecturer = document.getElementById('lectureLecturer').value;
+            const lecture_type = document.getElementById('lectureType').value;
+            const location = document.getElementById('lectureLocation').value.trim();
+            const scheduled_date = document.getElementById('lectureDate').value;
+            const start_time = document.getElementById('lectureStartTime').value;
+            const end_time = document.getElementById('lectureEndTime').value;
+            const room_latitude = document.getElementById('lectureLatitude').value;
+            const room_longitude = document.getElementById('lectureLongitude').value;
+            const room_radius = document.getElementById('lectureRadius').value || 50;
+
+            // Validate required fields
+            if (!title || !course_unit || !scheduled_date || !start_time || !end_time) {
+                document.getElementById('modalError').textContent = 'Please fill in all required fields (Title, Course, Date, Start Time, End Time)';
+                document.getElementById('modalError').style.display = 'block';
+                return;
+            }
+
+            // Validate time
+            if (start_time >= end_time) {
+                document.getElementById('modalError').textContent = 'End time must be after start time';
+                document.getElementById('modalError').style.display = 'block';
+                return;
+            }
+
+            // For physical lectures, validate coordinates
+            if (lecture_type === 'PHYSICAL') {
+                if (!room_latitude || !room_longitude) {
+                    if (!confirm('⚠️ This is a PHYSICAL lecture but you have not set room coordinates. Students will not be able to verify their location. Continue anyway?')) {
+                        return;
+                    }
+                }
+            }
+
+            const data = {
+                title: title,
+                course_unit: parseInt(course_unit),
+                programme: programme ? parseInt(programme) : null,
+                lecturer: lecturer ? parseInt(lecturer) : null,
+                lecture_type: lecture_type,
+                location: location,
+                scheduled_date: scheduled_date,
+                start_time: start_time,
+                end_time: end_time,
+                room_latitude: room_latitude ? parseFloat(room_latitude) : null,
+                room_longitude: room_longitude ? parseFloat(room_longitude) : null,
+                room_radius: parseInt(room_radius)
+            };
+
+            const isEdit = editingLectureId !== null;
+            const url = isEdit ? `/api/admin/update-lecture/${editingLectureId}/` : '/api/admin/add-lecture/';
+            const method = isEdit ? 'POST' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast(result.message || 'Lecture saved successfully!', 'success');
+                    closeLectureModal();
+                    loadLectures();
+                } else {
+                    document.getElementById('modalError').textContent = result.error || 'Failed to save lecture';
+                    document.getElementById('modalError').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error saving lecture:', error);
+                showToast('Error saving lecture: ' + error.message, 'error');
+            }
+        }
+
+        // Delete lecture
+        async function deleteLecture(lectureId) {
+            if (!confirm('Are you sure you want to cancel this lecture?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/delete-lecture/${lectureId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Lecture cancelled successfully!', 'success');
+                    loadLectures();
+                } else {
+                    showToast(result.error || 'Failed to cancel lecture', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting lecture:', error);
+                showToast('Error cancelling lecture', 'error');
+            }
+        }
+
+        // Start lecture (API call)
+        async function startLecture(lectureId) {
+            if (!confirm('Start this lecture? Students will be able to take attendance.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/attendance/start_lecture/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ lecture_id: lectureId })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast(`✅ Lecture started! Code: ${result.verification_code}`, 'success');
+                    loadLectures();
+                } else {
+                    showToast(result.error || 'Failed to start lecture', 'error');
+                }
+            } catch (error) {
+                console.error('Error starting lecture:', error);
+                showToast('Error starting lecture', 'error');
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('lectureModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLectureModal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLectures();
+        });
+    </script>
+</body>
+</html>

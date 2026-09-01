@@ -177,6 +177,10 @@
             background: #f5f5f5;
             color: #666;
         }
+        .status.cancelled {
+            background: #ffebee;
+            color: #c62828;
+        }
         .empty-state {
             text-align: center;
             padding: 30px;
@@ -218,6 +222,35 @@
             border-radius: 12px;
             font-size: 12px;
         }
+        .attended-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .table-responsive { overflow-x: auto; }
+        .progress-bar-container {
+            margin-top: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #43a047, #66bb6a);
+            transition: width 0.5s;
+            border-radius: 10px;
+        }
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #888;
+        }
 
         /* Modal Styles */
         .modal-overlay {
@@ -227,11 +260,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            backdrop-filter: blur(4px);
         }
         .modal-overlay.active {
             display: flex;
@@ -240,7 +274,7 @@
             background: white;
             border-radius: 20px;
             padding: 35px;
-            max-width: 500px;
+            max-width: 550px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -248,12 +282,12 @@
             animation: modalSlideIn 0.3s ease;
         }
         @keyframes modalSlideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { transform: translateY(-30px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
         .modal h2 {
             color: #2e7d32;
-            font-size: 22px;
+            font-size: 24px;
             margin-bottom: 5px;
         }
         .modal .subtitle {
@@ -276,10 +310,11 @@
             padding: 12px 16px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
-            font-size: 16px;
-            letter-spacing: 2px;
+            font-size: 18px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             transition: border-color 0.3s;
+            text-align: center;
         }
         .modal .form-group input:focus {
             border-color: #43a047;
@@ -301,7 +336,7 @@
         .modal .lecture-info .row {
             display: flex;
             justify-content: space-between;
-            padding: 5px 0;
+            padding: 6px 0;
             font-size: 14px;
         }
         .modal .lecture-info .row .label {
@@ -312,25 +347,41 @@
             color: #333;
         }
         .modal .location-status {
-            padding: 12px;
+            padding: 12px 16px;
             border-radius: 10px;
             margin-bottom: 15px;
             font-size: 14px;
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .modal .location-status:hover {
+            transform: scale(1.01);
         }
         .location-status.success {
             background: #e8f5e9;
             color: #2e7d32;
+            border: 1px solid #a5d6a7;
         }
         .location-status.error {
             background: #ffebee;
             color: #c62828;
+            border: 1px solid #ef9a9a;
         }
         .location-status.info {
             background: #e3f2fd;
             color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+        .location-status.warning {
+            background: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffcc80;
+        }
+        .location-status .icon {
+            font-size: 20px;
         }
         .modal .btn-take-attendance {
             width: 100%;
@@ -373,6 +424,7 @@
             margin-bottom: 15px;
             font-size: 14px;
             display: none;
+            border: 1px solid #ef9a9a;
         }
         .modal .error-message.show {
             display: block;
@@ -398,18 +450,20 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        @media (max-width: 768px) {
-            .navbar { flex-direction: column; text-align: center; }
-            .navbar-right { flex-direction: column; text-align: center; }
-            .container { padding: 15px; }
-            .dashboard-grid { grid-template-columns: 1fr 1fr; }
-            .modal { padding: 25px; }
+        .modal .room-coords {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
         }
-        @media (max-width: 480px) {
-            .dashboard-grid { grid-template-columns: 1fr; }
+        .modal .room-coords strong {
+            color: #333;
         }
 
+        /* Toast Notifications */
         .toast {
             position: fixed;
             top: 20px;
@@ -434,6 +488,19 @@
         @keyframes fadeOut {
             from { opacity: 1; }
             to { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; text-align: center; }
+            .navbar-right { flex-direction: column; text-align: center; }
+            .container { padding: 15px; }
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+            .modal { padding: 25px; }
+        }
+        @media (max-width: 480px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .modal { padding: 20px; }
+            .modal .lecture-info .row { flex-direction: column; gap: 2px; }
         }
     </style>
 </head>
@@ -485,22 +552,22 @@
             <div class="card success">
                 <div class="label">Attendance Percentage</div>
                 <div class="value">{{ attendance_percentage|floatformat:1 }}%</div>
-                <div class="sub">Overall attendance</div>
+                <div class="sub">Based on {{ total_lectures }} semester lectures</div>
             </div>
             <div class="card">
                 <div class="label">Total Lectures</div>
                 <div class="value">{{ total_lectures }}</div>
-                <div class="sub">Scheduled lectures</div>
+                <div class="sub">Available this semester</div>
             </div>
             <div class="card success">
-                <div class="label">Present</div>
-                <div class="value">{{ present }}</div>
-                <div class="sub">✅ Attended</div>
+                <div class="label">Attended</div>
+                <div class="value">{{ attended }}</div>
+                <div class="sub">✅ Present ({{ present }}) + Late ({{ late }})</div>
             </div>
             <div class="card danger">
-                <div class="label">Absent</div>
+                <div class="label">Missed</div>
                 <div class="value">{{ absent }}</div>
-                <div class="sub">❌ Missed</div>
+                <div class="sub">❌ Absent lectures</div>
             </div>
         </div>
 
@@ -521,15 +588,20 @@
                                 <span style="margin-left: 10px; font-size: 13px; color: #666;">
                                     {{ lecture.course_unit.code }}
                                 </span>
+                                {% if lecture.has_attended %}
+                                    <span class="attended-badge">✅ Attended</span>
+                                {% endif %}
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                 <span class="status {{ lecture.status }}">
                                     {{ lecture.status|title }}
                                 </span>
-                                {% if lecture.status == 'active' %}
-                                    <button class="btn btn-success" onclick="openAttendanceModal({{ lecture.id }}, '{{ lecture.title }}', '{{ lecture.get_lecture_type_display }}', '{{ lecture.start_time|time:"H:i" }}', '{{ lecture.end_time|time:"H:i" }}', '{{ lecture.lecture_type }}')">
+                                {% if lecture.status == 'active' and not lecture.has_attended %}
+                                    <button class="btn btn-success" onclick="openAttendanceModal({{ lecture.id }}, '{{ lecture.title|escapejs }}', '{{ lecture.get_lecture_type_display|escapejs }}', '{{ lecture.start_time|time:"H:i" }}', '{{ lecture.end_time|time:"H:i" }}', '{{ lecture.lecture_type }}', '{{ lecture.location|default:""|escapejs }}')">
                                         📝 Take Attendance
                                     </button>
+                                {% elif lecture.status == 'active' and lecture.has_attended %}
+                                    <span class="attended-badge">✅ Already Attended</span>
                                 {% endif %}
                             </div>
                         </li>
@@ -543,20 +615,45 @@
             {% endif %}
         </div>
 
+        {% if upcoming_lectures %}
+            <div class="section">
+                <h3>📅 Upcoming Lectures (Next 7 Days)</h3>
+                <ul class="lecture-list">
+                    {% for lecture in upcoming_lectures %}
+                        <li>
+                            <div>
+                                <strong>{{ lecture.title }}</strong>
+                                <span style="color: #888; font-size: 14px; margin-left: 10px;">
+                                    {{ lecture.scheduled_date|date:"M d" }} - {{ lecture.start_time|time:"H:i" }}
+                                </span>
+                                <span class="badge-lecture badge-{{ lecture.lecture_type|lower }}">
+                                    {{ lecture.get_lecture_type_display }}
+                                </span>
+                            </div>
+                            <span class="status scheduled">Scheduled</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
         <div class="section">
             <h3>📊 Attendance Summary</h3>
             <div style="display: flex; gap: 30px; flex-wrap: wrap; padding: 10px 0;">
                 <div>
-                    <span style="color: #666;">Total Lectures:</span>
+                    <span style="color: #666;">Total Semester Lectures:</span>
                     <strong style="font-size: 18px; color: #43a047;">{{ total_lectures }}</strong>
                 </div>
                 <div>
-                    <span style="color: #666;">Present:</span>
-                    <strong style="font-size: 18px; color: #2e7d32;">{{ present }}</strong>
+                    <span style="color: #666;">Attended:</span>
+                    <strong style="font-size: 18px; color: #2e7d32;">{{ attended }}</strong>
                     <span class="badge-present">✓</span>
+                    <span style="font-size: 12px; color: #666; margin-left: 5px;">
+                        (Present: {{ present }}, Late: {{ late }})
+                    </span>
                 </div>
                 <div>
-                    <span style="color: #666;">Absent:</span>
+                    <span style="color: #666;">Missed:</span>
                     <strong style="font-size: 18px; color: #c62828;">{{ absent }}</strong>
                     <span class="badge-absent">✗</span>
                 </div>
@@ -565,14 +662,78 @@
                     <strong style="font-size: 18px; color: #43a047;">
                         {{ attendance_percentage|floatformat:1 }}%
                     </strong>
+                    <span style="font-size: 12px; color: #666; margin-left: 5px;">
+                        ({{ attended }} / {{ total_lectures }})
+                    </span>
                 </div>
+                {% if excused > 0 %}
+                    <div>
+                        <span style="color: #666;">Excused:</span>
+                        <strong style="font-size: 18px; color: #f9a825;">{{ excused }}</strong>
+                        <span style="font-size: 12px; color: #666;">📋</span>
+                    </div>
+                {% endif %}
             </div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: {{ attendance_percentage }}%;"></div>
+            </div>
+            <div class="progress-labels">
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
+            </div>
+            
             <div style="margin-top: 15px; background: #e8f5e9; padding: 15px; border-radius: 10px;">
                 <p style="color: #2e7d32; font-size: 14px;">
-                    💡 <strong>Tip:</strong> Make sure you're within campus for physical lectures and have your verification code ready.
+                    💡 <strong>Note:</strong> Attendance percentage is calculated based on <strong>{{ total_lectures }}</strong> total lectures available this semester.
+                    You have attended <strong>{{ attended }}</strong> lectures ({{ present }} present, {{ late }} late).
+                    {% if absent > 0 %}
+                        You have missed <strong>{{ absent }}</strong> lectures.
+                    {% endif %}
                 </p>
             </div>
         </div>
+
+        {% if attendance_history %}
+            <div class="section">
+                <h3>📋 Recent Attendance History</h3>
+                <div class="table-responsive">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #a5d6a7; background: #e8f5e9; color: #2e7d32;">Date</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #a5d6a7; background: #e8f5e9; color: #2e7d32;">Lecture</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #a5d6a7; background: #e8f5e9; color: #2e7d32;">Type</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #a5d6a7; background: #e8f5e9; color: #2e7d32;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attendance in attendance_history %}
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">{{ attendance.check_in_time|date:"M d, Y H:i" }}</td>
+                                    <td style="padding: 10px;">{{ attendance.lecture.title }}</td>
+                                    <td style="padding: 10px;">
+                                        <span class="badge-lecture badge-{{ attendance.lecture.lecture_type|lower }}">
+                                            {{ attendance.lecture.get_lecture_type_display }}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 10px;">
+                                        <span class="badge badge-success">✅ {{ attendance.get_status_display }}</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if total_lectures > 10 %}
+                    <div style="text-align: center; margin-top: 10px;">
+                        <a href="{% url 'attendance_history' %}" class="btn btn-primary">View Full History</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
 
         <div class="footer">
             &copy; 2025 UICT - UICT E-Attendance System (UICT-ESAS)
@@ -600,15 +761,29 @@
                     <span class="label">Time:</span>
                     <span class="value" id="modalTime">Loading...</span>
                 </div>
+                <div class="row" id="modalLocationRow" style="display: none;">
+                    <span class="label">Room:</span>
+                    <span class="value" id="modalLocation">Loading...</span>
+                </div>
+                <div id="modalCoordsRow" style="display: none;">
+                    <div class="room-coords">
+                        📍 <strong>Room Coordinates:</strong> 
+                        <span id="modalCoords">Loading...</span>
+                        <span style="display: block; font-size: 11px; color: #999; margin-top: 3px;">
+                            You must be within <span id="modalRadius">50</span> meters of this location
+                        </span>
+                    </div>
+                </div>
             </div>
 
-            <div id="locationStatus" class="location-status info">
-                📍 Checking location...
+            <div class="location-status info" id="locationStatus">
+                <span class="icon">📍</span>
+                <span id="locationStatusText">Checking location...</span>
             </div>
 
             <div class="form-group">
                 <label for="verificationCode">Verification Code</label>
-                <input type="text" id="verificationCode" placeholder="Enter code (e.g., UICT-583921)" autocomplete="off">
+                <input type="text" id="verificationCode" placeholder="Enter code (e.g., UICT-583921)" autocomplete="off" maxlength="20">
             </div>
 
             <div class="loading-spinner" id="loadingSpinner">
@@ -633,46 +808,79 @@
             type: '',
             start: '',
             end: '',
-            lectureType: ''
+            lectureType: '',
+            location: '',
+            roomLatitude: null,
+            roomLongitude: null,
+            roomRadius: 50
         };
+
+        let locationChecked = false;
+        let locationVerified = false;
+        let locationData = null;
 
         // Get CSRF token
         function getCsrfToken() {
-            const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+            var cookie = document.cookie.split('; ').find(function(row) {
+                return row.startsWith('csrftoken=');
+            });
             return cookie ? cookie.split('=')[1] : '';
         }
 
         // Show toast notification
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
+        function showToast(message, type) {
+            type = type || 'info';
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
             toast.textContent = message;
             container.appendChild(toast);
 
-            setTimeout(() => {
+            setTimeout(function() {
                 toast.style.animation = 'fadeOut 0.5s ease';
-                setTimeout(() => toast.remove(), 500);
+                setTimeout(function() { toast.remove(); }, 500);
             }, 5000);
         }
 
         // Open attendance modal
-        function openAttendanceModal(lectureId, title, type, start, end, lectureType) {
+        function openAttendanceModal(lectureId, title, type, start, end, lectureType, location) {
             currentLecture = {
                 id: lectureId,
                 title: title,
                 type: type,
                 start: start,
                 end: end,
-                lectureType: lectureType
+                lectureType: lectureType,
+                location: location || '',
+                roomLatitude: null,
+                roomLongitude: null,
+                roomRadius: 50
             };
+
+            // Reset state
+            locationChecked = false;
+            locationVerified = false;
+            locationData = null;
 
             // Update modal with lecture info
             document.getElementById('modalCourse').textContent = title;
             document.getElementById('modalType').textContent = type + (lectureType === 'PHYSICAL' ? ' 📍' : ' 💻');
             document.getElementById('modalTime').textContent = start + ' - ' + end;
 
-            // Clear previous error
+            // Show/hide room info
+            if (lectureType === 'PHYSICAL') {
+                document.getElementById('modalLocationRow').style.display = 'flex';
+                document.getElementById('modalLocation').textContent = location || 'Not specified';
+                document.getElementById('modalCoordsRow').style.display = 'block';
+                
+                // Fetch room coordinates for this lecture
+                fetchLectureCoordinates(lectureId);
+            } else {
+                document.getElementById('modalLocationRow').style.display = 'none';
+                document.getElementById('modalCoordsRow').style.display = 'none';
+            }
+
+            // Clear previous error and code
             document.getElementById('modalError').className = 'error-message';
             document.getElementById('modalError').textContent = '';
             document.getElementById('verificationCode').value = '';
@@ -685,14 +893,188 @@
             if (lectureType === 'PHYSICAL') {
                 checkLocation();
             } else {
+                // ONLINE lecture - no location check needed
                 document.getElementById('locationStatus').className = 'location-status success';
-                document.getElementById('locationStatus').innerHTML = '💻 ONLINE LECTURE - No location check required';
+                document.getElementById('locationStatusText').innerHTML = '💻 ONLINE LECTURE - No location check required';
+                locationChecked = true;
+                locationVerified = true;
             }
 
             // Focus on code input
-            setTimeout(() => {
+            setTimeout(function() {
                 document.getElementById('verificationCode').focus();
             }, 500);
+        }
+
+        // Fetch lecture coordinates - UPDATED to handle 403 properly
+        async function fetchLectureCoordinates(lectureId) {
+            try {
+                var response = await fetch('/api/admin/get-lecture/' + lectureId + '/');
+                
+                // Check if response is ok
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        document.getElementById('modalCoords').textContent = '⚠️ You do not have permission to view coordinates';
+                        document.getElementById('modalCoordsRow').style.display = 'block';
+                        showToast('Unable to fetch room coordinates. Please contact the lecturer.', 'error');
+                        // Still allow the student to proceed but show warning
+                        document.getElementById('locationStatus').className = 'location-status warning';
+                        document.getElementById('locationStatusText').innerHTML = 
+                            '⚠️ Unable to verify location. Please contact the lecturer.';
+                        return;
+                    }
+                    throw new Error('Failed to fetch lecture details');
+                }
+                
+                var data = await response.json();
+                if (data.lecture) {
+                    var l = data.lecture;
+                    if (l.room_latitude && l.room_longitude) {
+                        currentLecture.roomLatitude = parseFloat(l.room_latitude);
+                        currentLecture.roomLongitude = parseFloat(l.room_longitude);
+                        currentLecture.roomRadius = parseInt(l.room_radius) || 50;
+                        
+                        document.getElementById('modalCoords').textContent = 
+                            l.room_latitude + ', ' + l.room_longitude;
+                        document.getElementById('modalRadius').textContent = currentLecture.roomRadius;
+                        
+                        // Update location check with room coordinates
+                        if (locationData) {
+                            verifyLocationAgainstRoom(locationData.latitude, locationData.longitude);
+                        }
+                    } else {
+                        document.getElementById('modalCoords').textContent = '⚠️ No coordinates set for this room';
+                        document.getElementById('modalRadius').textContent = 'N/A';
+                        // For physical lectures without coordinates, show warning
+                        if (currentLecture.lectureType === 'PHYSICAL') {
+                            document.getElementById('locationStatus').className = 'location-status warning';
+                            document.getElementById('locationStatusText').innerHTML = 
+                                '⚠️ Room coordinates not set. Please contact the lecturer.';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching lecture coordinates:', error);
+                document.getElementById('modalCoords').textContent = '❌ Failed to load coordinates';
+                document.getElementById('modalCoordsRow').style.display = 'block';
+                showToast('Error loading lecture details. Please try again.', 'error');
+            }
+        }
+
+        // Check location
+        function checkLocation() {
+            var statusEl = document.getElementById('locationStatus');
+            var statusText = document.getElementById('locationStatusText');
+            
+            statusEl.className = 'location-status info';
+            statusText.innerHTML = '📍 Checking your location...';
+
+            if (!navigator.geolocation) {
+                statusEl.className = 'location-status error';
+                statusText.innerHTML = '❌ Geolocation is not supported by your browser';
+                locationChecked = true;
+                locationVerified = false;
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    locationData = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    // If this is a physical lecture with room coordinates, verify against room
+                    if (currentLecture.lectureType === 'PHYSICAL' && 
+                        currentLecture.roomLatitude && currentLecture.roomLongitude) {
+                        verifyLocationAgainstRoom(position.coords.latitude, position.coords.longitude);
+                    } else if (currentLecture.lectureType === 'PHYSICAL') {
+                        // No room coordinates set yet, wait for fetch
+                        statusEl.className = 'location-status info';
+                        statusText.innerHTML = '📍 Location captured. Waiting for room coordinates...';
+                        locationChecked = true;
+                        locationVerified = false;
+                    } else {
+                        // ONLINE lecture
+                        statusEl.className = 'location-status success';
+                        statusText.innerHTML = '✅ Location not required for online lecture';
+                        locationChecked = true;
+                        locationVerified = true;
+                    }
+                },
+                function(error) {
+                    statusEl.className = 'location-status error';
+                    var errorMsg = '';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = '❌ LOCATION PERMISSION IS REQUIRED. Please allow location access in your browser settings and try again.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = '❌ Location information is unavailable. Please enable GPS and try again.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = '❌ Location request timed out. Please try again.';
+                            break;
+                        default:
+                            errorMsg = '❌ Failed to get location. Please try again.';
+                    }
+                    statusText.innerHTML = errorMsg;
+                    locationChecked = true;
+                    locationVerified = false;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Verify location against room coordinates
+        function verifyLocationAgainstRoom(studentLat, studentLon) {
+            var statusEl = document.getElementById('locationStatus');
+            var statusText = document.getElementById('locationStatusText');
+
+            if (!currentLecture.roomLatitude || !currentLecture.roomLongitude) {
+                statusEl.className = 'location-status warning';
+                statusText.innerHTML = '⚠️ Room coordinates not configured. Please contact the lecturer.';
+                locationChecked = true;
+                locationVerified = false;
+                return;
+            }
+
+            // Calculate distance using Haversine formula
+            var distance = calculateDistance(
+                studentLat, studentLon,
+                currentLecture.roomLatitude, currentLecture.roomLongitude
+            );
+
+            var radius = currentLecture.roomRadius || 50;
+
+            if (distance <= radius) {
+                statusEl.className = 'location-status success';
+                statusText.innerHTML = '✅ You are within the classroom! (' + distance.toFixed(1) + 'm from room)';
+                locationChecked = true;
+                locationVerified = true;
+            } else {
+                statusEl.className = 'location-status error';
+                statusText.innerHTML = '❌ YOU ARE OUT OF THE CLASSROOM. You are ' + distance.toFixed(1) + 'm away. Please move within ' + radius + 'm of the room.';
+                locationChecked = true;
+                locationVerified = false;
+            }
+        }
+
+        // Calculate distance between two coordinates (Haversine formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            var R = 6371000; // Earth's radius in meters
+            var dLat = (lat2 - lat1) * Math.PI / 180;
+            var dLon = (lon2 - lon1) * Math.PI / 180;
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
         }
 
         // Close attendance modal
@@ -702,57 +1084,10 @@
             document.getElementById('submitAttendanceBtn').disabled = false;
         }
 
-        // Check location for physical lectures
-        function checkLocation() {
-            const statusEl = document.getElementById('locationStatus');
-            statusEl.className = 'location-status info';
-            statusEl.innerHTML = '📍 Checking your location...';
-
-            if (!navigator.geolocation) {
-                statusEl.className = 'location-status error';
-                statusEl.innerHTML = '❌ Geolocation is not supported by your browser';
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    statusEl.className = 'location-status success';
-                    statusEl.innerHTML = `✅ Location verified (${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)})`;
-                    // Store location for submission
-                    window.studentLocation = {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    };
-                },
-                function(error) {
-                    statusEl.className = 'location-status error';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            statusEl.innerHTML = '❌ LOCATION PERMISSION IS REQUIRED. Please allow location access and try again.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            statusEl.innerHTML = '❌ Location information is unavailable. Please enable GPS.';
-                            break;
-                        case error.TIMEOUT:
-                            statusEl.innerHTML = '❌ Location request timed out. Please try again.';
-                            break;
-                        default:
-                            statusEl.innerHTML = '❌ Failed to get location. Please try again.';
-                    }
-                    window.studentLocation = null;
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
-        }
-
         // Submit attendance
         async function submitAttendance() {
-            const codeInput = document.getElementById('verificationCode');
-            const verificationCode = codeInput.value.trim().toUpperCase();
+            var codeInput = document.getElementById('verificationCode');
+            var verificationCode = codeInput.value.trim().toUpperCase();
 
             if (!verificationCode) {
                 showToast('Please enter the verification code', 'warning');
@@ -767,8 +1102,20 @@
                 return;
             }
 
-            const submitBtn = document.getElementById('submitAttendanceBtn');
-            const loadingSpinner = document.getElementById('loadingSpinner');
+            // For physical lectures, verify location is checked and verified
+            if (currentLecture.lectureType === 'PHYSICAL') {
+                if (!locationChecked) {
+                    showToast('Please wait for location verification...', 'info');
+                    return;
+                }
+                if (!locationVerified) {
+                    showToast('You are out of the classroom. Please move to the designated room.', 'error');
+                    return;
+                }
+            }
+
+            var submitBtn = document.getElementById('submitAttendanceBtn');
+            var loadingSpinner = document.getElementById('loadingSpinner');
 
             // Disable button and show loading
             submitBtn.disabled = true;
@@ -776,53 +1123,20 @@
 
             try {
                 // Prepare data
-                const data = {
+                var data = {
                     lecture_id: currentLecture.id,
                     verification_code: verificationCode,
                     device_identifier: localStorage.getItem('deviceId') || generateDeviceId()
                 };
 
                 // Add location for physical lectures
-                if (currentLecture.lectureType === 'PHYSICAL') {
-                    if (window.studentLocation) {
-                        data.latitude = window.studentLocation.latitude;
-                        data.longitude = window.studentLocation.longitude;
-                    } else {
-                        // Try to get location again
-                        showToast('Getting location... Please allow location access', 'info');
-                        await new Promise((resolve) => {
-                            if (navigator.geolocation) {
-                                navigator.geolocation.getCurrentPosition(
-                                    function(position) {
-                                        data.latitude = position.coords.latitude;
-                                        data.longitude = position.coords.longitude;
-                                        window.studentLocation = {
-                                            latitude: position.coords.latitude,
-                                            longitude: position.coords.longitude
-                                        };
-                                        resolve();
-                                    },
-                                    function() {
-                                        resolve();
-                                    },
-                                    { enableHighAccuracy: true, timeout: 5000 }
-                                );
-                            } else {
-                                resolve();
-                            }
-                        });
-
-                        if (!data.latitude || !data.longitude) {
-                            showToast('Location permission is required for physical lectures', 'error');
-                            submitBtn.disabled = false;
-                            loadingSpinner.className = 'loading-spinner';
-                            return;
-                        }
-                    }
+                if (currentLecture.lectureType === 'PHYSICAL' && locationData) {
+                    data.latitude = locationData.latitude;
+                    data.longitude = locationData.longitude;
                 }
 
                 // Submit attendance
-                const response = await fetch('/api/attendance/take_attendance/', {
+                var response = await fetch('/api/attendance/take_attendance/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -831,19 +1145,27 @@
                     body: JSON.stringify(data)
                 });
 
-                const result = await response.json();
+                var result = await response.json();
 
                 if (response.ok) {
                     showToast(result.message || '✅ Attendance recorded successfully!', 'success');
                     closeAttendanceModal();
                     // Refresh page to update stats
-                    setTimeout(() => location.reload(), 1500);
+                    setTimeout(function() { location.reload(); }, 1500);
                 } else {
-                    showToast(result.error || '❌ Failed to record attendance', 'error');
-                    document.getElementById('modalError').textContent = result.error || 'An error occurred';
+                    var errorMsg = result.error || '❌ Failed to record attendance';
+                    showToast(errorMsg, 'error');
+                    document.getElementById('modalError').textContent = errorMsg;
                     document.getElementById('modalError').className = 'error-message show';
                     submitBtn.disabled = false;
                     loadingSpinner.className = 'loading-spinner';
+                    
+                    // If error is location related, re-check location
+                    if (errorMsg.indexOf('OUT OF THE CLASSROOM') !== -1 || errorMsg.indexOf('Location') !== -1) {
+                        if (currentLecture.lectureType === 'PHYSICAL') {
+                            checkLocation();
+                        }
+                    }
                 }
 
             } catch (error) {
@@ -858,7 +1180,7 @@
 
         // Generate device ID
         function generateDeviceId() {
-            const deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            var deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('deviceId', deviceId);
             return deviceId;
         }
@@ -874,6 +1196,13 @@
         document.getElementById('attendanceModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeAttendanceModal();
+            }
+        });
+
+        // Re-check location if user clicks on location status (for physical lectures)
+        document.getElementById('locationStatus').addEventListener('click', function() {
+            if (currentLecture.lectureType === 'PHYSICAL') {
+                checkLocation();
             }
         });
     </script>

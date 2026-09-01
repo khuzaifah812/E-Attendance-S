@@ -30,6 +30,12 @@ class Lecture(models.Model):
     actual_start = models.DateTimeField(null=True, blank=True)
     actual_end = models.DateTimeField(null=True, blank=True)
     location = models.CharField(max_length=200, blank=True)
+    
+    # NEW: Room coordinates for physical lectures
+    room_latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True, help_text="Latitude of the room for physical lectures")
+    room_longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True, help_text="Longitude of the room for physical lectures")
+    room_radius = models.IntegerField(default=50, help_text="Allowed radius in meters from the room coordinates")
+    
     verification_code = models.CharField(max_length=20, blank=True)
     code_expires_at = models.DateTimeField(null=True, blank=True)
     max_attempts = models.IntegerField(default=3)
@@ -47,3 +53,13 @@ class Lecture(models.Model):
 
     def __str__(self):
         return f"{self.course_unit} - {self.scheduled_date} ({self.get_lecture_type_display()})"
+    
+    def get_room_location(self):
+        """Get room location as a dict"""
+        if self.room_latitude and self.room_longitude:
+            return {
+                'latitude': float(self.room_latitude),
+                'longitude': float(self.room_longitude),
+                'radius': self.room_radius
+            }
+        return None
