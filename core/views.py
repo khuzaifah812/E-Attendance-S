@@ -443,7 +443,6 @@ def admin_dashboard(request):
 
 
 # ==================== PROFILE VIEWS ====================
-
 @login_required
 def change_password_view(request):
     """
@@ -454,30 +453,44 @@ def change_password_view(request):
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
         
-        if current_password:
+        # Check if this is first login
+        is_first_login = not request.user.is_verified
+        
+        # For non-first login, verify current password
+        if not is_first_login:
+            if not current_password:
+                messages.error(request, 'Please enter your current password.')
+                return render(request, 'core/change_password.html', {'is_first_login': is_first_login})
+            
             if not request.user.check_password(current_password):
                 messages.error(request, 'Current password is incorrect.')
-                return render(request, 'core/change_password.html')
+                return render(request, 'core/change_password.html', {'is_first_login': is_first_login})
         
+        # Validate new password
         if not new_password or len(new_password) < 8:
             messages.error(request, 'Password must be at least 8 characters long.')
-            return render(request, 'core/change_password.html')
+            return render(request, 'core/change_password.html', {'is_first_login': is_first_login})
         
         if new_password != confirm_password:
             messages.error(request, 'Passwords do not match.')
-            return render(request, 'core/change_password.html')
+            return render(request, 'core/change_password.html', {'is_first_login': is_first_login})
         
+        # Check password strength
         if not re.search(r'[A-Z]', new_password):
             messages.warning(request, 'Password should contain at least one uppercase letter.')
         if not re.search(r'[a-z]', new_password):
             messages.warning(request, 'Password should contain at least one lowercase letter.')
         if not re.search(r'[0-9]', new_password):
             messages.warning(request, 'Password should contain at least one number.')
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', new_password):
+            messages.warning(request, 'Password should contain at least one special character for better security.')
         
+        # Change password
         request.user.set_password(new_password)
         request.user.is_verified = True
         request.user.save()
         
+        # Re-authenticate user
         user = authenticate(request, username=request.user.username, password=new_password)
         if user:
             login(request, user)
@@ -485,6 +498,7 @@ def change_password_view(request):
         messages.success(request, 'Password changed successfully!')
         return redirect('dashboard')
     
+    # Check if user needs to change password (first login)
     is_first_login = not request.user.is_verified
     
     context = {
